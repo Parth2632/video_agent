@@ -1,0 +1,26 @@
+# virtual environment
+venv/
+.venv/
+
+# environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# downloads / generated data (VERY relevant for your project)
+downloads/
+*.wav
+*.m4a
+*.webm
+
+# Jupyter (if you ever use notebooks)
+.ipynb_checkpoints/
