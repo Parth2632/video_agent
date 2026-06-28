@@ -9,8 +9,8 @@ An AI-powered application that transforms YouTube videos and local audio files i
 ### 🎥 Audio Extraction
 
 * Supports both YouTube URLs and local audio/video files.
-* Uses `yt-dlp` to download media from YouTube.
-* Supports browser-cookie authentication for improved download reliability when required.
+* Uses `youtube-transcript-api` to instantly fetch YouTube transcripts, bypassing heavy audio downloads.
+* Uses `yt-dlp` and `ffmpeg` to process local audio files.
 
 ### 🎙️ Speech-to-Text
 
@@ -64,13 +64,13 @@ Create searchable transcripts from lectures or seminars and ask natural language
 | Category         | Technologies                      |
 | ---------------- | --------------------------------- |
 | Language         | Python 3                          |
-| Speech-to-Text   | OpenAI Whisper                    |
+| UI Framework     | Streamlit                         |
+| Speech-to-Text   | OpenAI Whisper, YouTube API       |
 | LLM              | Mistral AI                        |
 | RAG Framework    | LangChain                         |
 | Vector Database  | ChromaDB                          |
 | Embeddings       | HuggingFace Sentence Transformers |
 | Audio Processing | Pydub, FFmpeg                     |
-| Video Download   | yt-dlp                            |
 | Machine Learning | PyTorch                           |
 
 ---
@@ -96,11 +96,12 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run the application:
+Run the application (Streamlit UI):
 
 ```bash
-python main.py
+streamlit run app.py
 ```
+*(Alternatively, run the CLI version with `python main.py`)*
 
 ---
 
@@ -109,7 +110,7 @@ python main.py
 1. Launch the application.
 
 ```bash
-python main.py
+streamlit run app.py
 ```
 
 2. Provide either:
@@ -137,23 +138,19 @@ Type `exit` to leave the chat.
 ```text
              YouTube URL / Local File
                        │
+          ┌────────────┴────────────┐
+          ▼                         ▼
+    YouTube API               Local File
+ (Instant Transcript)             │
+          │                       ▼
+          │               Audio Preprocessing
+          │                   (FFmpeg)
+          │                       │
+          │                       ▼
+          │             Whisper Transcription
+          │                       │
+          └────────────┬──────────┘
                        ▼
-              Audio Extraction
-              (yt-dlp / Local File)
-                       │
-                       ▼
-          Audio Preprocessing
-      (Mono + 16 kHz Conversion)
-                       │
-                       ▼
-             Audio Chunking
-          (Fixed-Duration Segments)
-                       │
-                       ▼
-          Whisper Transcription
-                       │
-        ┌──────────────┴──────────────┐
-        ▼                             ▼
  Meeting Analysis          Transcript Chunking
    (Mistral AI)                     │
                                     ▼
@@ -187,6 +184,7 @@ AI-Video-Meeting-Assistant/
 │   └── audio_processor.py
 │
 ├── main.py
+├── app.py
 ├── requirements.txt
 └── .env
 ```

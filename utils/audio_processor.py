@@ -22,13 +22,15 @@ def download_youtube_audio(url: str) -> str:
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-        # Try to pull cookies from browser to avoid YouTube bot detection
-        'cookiesfrombrowser': ('chrome',), 
-        'extractor_args': {
-            'youtube': {'player_client': ['android', 'web']}
-        },
+
         'quiet': True,
     }
+    
+    if os.path.exists("cookies.txt"):
+        ydl_opts['cookiefile'] = "cookies.txt"
+    else:
+        # Try to pull cookies from browser to avoid YouTube bot detection
+        ydl_opts['cookiesfrombrowser'] = ('chrome',)
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
