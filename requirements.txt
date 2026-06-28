@@ -86,3 +86,6 @@ pandas
 torch
 langchain-chroma
 imageio-ffmpeg
+
+# YouTube Transcript
+youtube-transcript-api

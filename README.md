@@ -118,12 +118,12 @@ streamlit run app.py
 * A YouTube URL
 * A local audio/video file
 
-3. The application will:
+3. Depending on the source, the application will:
 
-* Download or load the media
-* Convert it to mono 16 kHz WAV
-* Split the audio into manageable chunks
-* Transcribe each chunk using Whisper
+* **For YouTube URLs:** Instantly fetch the transcript using the YouTube API (bypassing the download).
+* **For Local Files:** Load the media, convert to mono 16 kHz WAV, split into chunks, and transcribe using Whisper locally.
+
+4. After transcription, the application will:
 * Generate meeting insights using Mistral AI
 * Build a vector database from the transcript
 
