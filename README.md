@@ -1,33 +1,34 @@
 # 🎙️ AI Video & Meeting Assistant
 
-An AI-powered application that transforms YouTube videos and local audio files into structured meeting insights. It generates transcripts, meeting summaries, action items, key decisions, and enables semantic question answering over transcripts using Retrieval-Augmented Generation (RAG).
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GPU Required](https://img.shields.io/badge/GPU-NVIDIA_CUDA-green.svg)]()
+
+An AI-powered terminal application that transforms YouTube videos and local video/audio files into structured meeting insights. It generates transcripts, meeting summaries, action items, key decisions, and enables semantic question answering over transcripts using Retrieval-Augmented Generation (RAG).
+
+---
+
+## 📸 Demo
+
+*(Placeholder: Add your terminal recording or `asciinema` GIF here)*
+![Terminal Demo](https://via.placeholder.com/800x400?text=Terminal+Demo+GIF+Placeholder)
 
 ---
 
 # ✨ Features
 
-### 🎥 Audio Extraction
+### 🎥 Media Processing
+* Supports both YouTube URLs and raw local video/audio files (e.g. `.mkv`, `.mp4`).
+* Uses `youtube-transcript-api` to fetch YouTube transcripts when available.
+* Streams and decodes media natively on-the-fly, bypassing the need for intermediate `.wav` conversions.
 
-* Supports both YouTube URLs and local audio/video files.
-* Uses `youtube-transcript-api` to instantly fetch YouTube transcripts, bypassing heavy audio downloads.
-* Uses `yt-dlp` and `ffmpeg` to process local audio files.
-
-### 🎙️ Speech-to-Text
-
-* Uses OpenAI Whisper for local speech-to-text transcription.
-* Supports multiple Whisper models (`tiny`, `base`, `small`).
-* Processes audio locally before transcript analysis.
-
-### 🎵 Audio Preprocessing
-
-* Converts audio to **mono, 16 kHz WAV** format using `pydub` for Whisper compatibility.
-* Splits long recordings into fixed-duration chunks before transcription.
-* Merges chunk-level transcriptions into a complete transcript.
+### ⚡ Optimized Local Speech-to-Text
+* Powered by **faster-whisper** (CTranslate2 engine) for highly efficient, local GPU transcription.
+* Configured by default to use the `tiny` model with `int8` quantization for maximum performance and minimal VRAM usage.
+* Features built-in Voice Activity Detection (VAD) to skip silent parts and avoid manual chunking.
 
 ### 🧠 AI Meeting Analysis
-
-Uses Mistral AI to automatically generate:
-
+Uses Mistral AI (or any LLM of your choice) via LangChain to automatically generate:
 * Meeting title
 * Summary
 * Action items
@@ -35,27 +36,23 @@ Uses Mistral AI to automatically generate:
 * Open questions
 
 ### 🔍 Retrieval-Augmented Generation (RAG)
-
 * Splits transcripts into semantic chunks.
 * Generates vector embeddings using HuggingFace Sentence Transformers.
-* Stores embeddings in ChromaDB.
-* Retrieves relevant transcript sections with LangChain to answer user queries.
+* Stores embeddings in ChromaDB (optimized for batch processing).
+* Features **Conversational Memory** to understand follow-up questions and pronouns based on chat history.
+* Retrieves relevant transcript sections with LangChain to answer user queries right in your terminal.
 
 ---
 
-# 🎯 Use Cases
+# 🚀 Performance Tuning & Optimization Journey
 
-### 📋 Meeting Summarization
+This project was optimized to run efficiently on consumer hardware (specifically tested on an NVIDIA RTX A2000 GPU). Here is how we reduced the processing time for a 22-minute video from **54 minutes** down to **2 minutes**:
 
-Generate concise meeting summaries, action items, and decisions from recorded meetings.
+1. **The Starting Point (54 minutes):** The original architecture used the standard OpenAI `whisper` library with the `large-v2` model, and manually sliced audio into chunks using `pydub`. It was highly accurate but prohibitively slow and prone to memory overhead.
+2. **Switching Engines (3 min 21 sec):** We replaced standard Whisper with `faster-whisper`, switched to the multilingual `base` model, and enabled `int8` quantization. This dropped the transcription time drastically.
+3. **Removing Bottlenecks (2 min 5 sec):** We realized `pydub` was unnecessarily converting video files into intermediate `.wav` files on the hard drive. By passing the raw `.mkv` files directly into `faster-whisper` (which uses PyAV to stream audio into memory on-the-fly) and dropping the model size to `tiny`, we shaved off another 22 seconds and eliminated all manual audio chunking. 
 
-### 🎥 Content Analysis
-
-Analyze YouTube videos, podcasts, interviews, and recorded discussions without manually searching through long recordings.
-
-### 📚 Lecture & Research Assistant
-
-Create searchable transcripts from lectures or seminars and ask natural language questions about the content.
+*(Note: Of the final 2 minutes, roughly 45-60 seconds is network time waiting for the Mistral API to generate the summary. The actual GPU transcription takes barely a minute.)*
 
 ---
 
@@ -64,13 +61,12 @@ Create searchable transcripts from lectures or seminars and ask natural language
 | Category         | Technologies                      |
 | ---------------- | --------------------------------- |
 | Language         | Python 3                          |
-| UI Framework     | Streamlit                         |
-| Speech-to-Text   | OpenAI Whisper, YouTube API       |
-| LLM              | Mistral AI                        |
-| RAG Framework    | LangChain                         |
+| UI               | Interactive Terminal CLI          |
+| Speech-to-Text   | Faster-Whisper, YouTube API       |
+| LLM              | Mistral AI / LangChain            |
 | Vector Database  | ChromaDB                          |
 | Embeddings       | HuggingFace Sentence Transformers |
-| Audio Processing | Pydub, FFmpeg                     |
+| Media Decoding   | PyAV, FFmpeg                      |
 | Machine Learning | PyTorch                           |
 
 ---
@@ -81,14 +77,21 @@ Create searchable transcripts from lectures or seminars and ask natural language
 
 * Python 3.10+
 * FFmpeg installed and available in your system PATH
+* A CUDA-compatible NVIDIA GPU (highly recommended for performance)
 
 Create a `.env` file:
 
 ```env
-MISTRAL_API_KEY="your_mistral_api_key"
 WHISPER_MODEL="tiny"
-HF_TOKEN="your_huggingface_token"
+MISTRAL_API_KEY="your_mistral_api_key"
 ```
+
+## Key Dependencies
+While a full `requirements.txt` is provided, the core libraries powering this tool include:
+- `faster-whisper` (Transcription)
+- `langchain` & `langchain-community` (LLM orchestration and RAG)
+- `chromadb` (Vector storage)
+- `youtube-transcript-api` (Native YouTube caption extraction)
 
 Install dependencies:
 
@@ -96,110 +99,67 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run the application (Streamlit UI):
-
-```bash
-streamlit run app.py
-```
-*(Alternatively, run the CLI version with `python main.py`)*
-
 ---
 
 # 💻 Usage
 
-1. Launch the application.
-
+### Interactive Mode
+Launch the application in your terminal to process a video and enter an interactive Q&A session:
 ```bash
-streamlit run app.py
+python main.py
 ```
 
-2. Provide either:
-
-* A YouTube URL
-* A local audio/video file
-
-3. Depending on the source, the application will:
-
-* **For YouTube URLs:** Instantly fetch the transcript using the YouTube API (bypassing the download).
-* **For Local Files:** Load the media, convert to mono 16 kHz WAV, split into chunks, and transcribe using Whisper locally.
-
-4. After transcription, the application will:
-* Generate meeting insights using Mistral AI
-* Build a vector database from the transcript
-
-4. Ask questions about the transcript in the interactive terminal.
-
-Type `exit` to leave the chat.
+### Headless / Batch Mode
+If you just want the transcription and summary generated without entering the interactive Q&A loop, run the headless version. This is ideal for background tasks or batch processing multiple videos:
+```bash
+python run_headless.py
+```
 
 ---
 
 # 🧠 System Architecture
 
 ```text
-             YouTube URL / Local File
+             YouTube URL / Local Video File
                        │
           ┌────────────┴────────────┐
           ▼                         ▼
-    YouTube API               Local File
- (Instant Transcript)             │
-          │                       ▼
-          │               Audio Preprocessing
-          │                   (FFmpeg)
-          │                       │
-          │                       ▼
-          │             Whisper Transcription
-          │                       │
-          └────────────┬──────────┘
+    YouTube API              Direct Streaming
+ (Instant Transcript)        (PyAV / FFmpeg)
+          │                         │
+          │                         ▼
+          │               Faster-Whisper (INT8)
+          │               (Local GPU Inference)
+          └────────────┬────────────┘
                        ▼
- Meeting Analysis          Transcript Chunking
-   (Mistral AI)                     │
-                                    ▼
-                  HuggingFace Embeddings
-                                    │
-                                    ▼
-                              ChromaDB
-                                    │
-                                    ▼
-                         LangChain Retriever
-                                    │
-                                    ▼
-                        Interactive RAG Q&A
+ Meeting Analysis            Transcript Chunking
+   (Mistral AI)                       │
+                                      ▼
+                    HuggingFace Embeddings
+                                      │
+                                      ▼
+                                ChromaDB
+                                      │
+                                      ▼
+                           LangChain Retriever
+                                      │
+                                      ▼
+                          Interactive RAG Q&A
 ```
 
 ---
 
-# 📂 Project Structure
+# 🤝 Contributing
 
-```text
-AI-Video-Meeting-Assistant/
-│
-├── core/
-│   ├── extractor.py
-│   ├── rag_engine.py
-│   ├── summarizer.py
-│   ├── transcriber.py
-│   └── vector_store.py
-│
-├── utils/
-│   └── audio_processor.py
-│
-├── main.py
-├── app.py
-├── requirements.txt
-└── .env
-```
+Contributions are welcome! If you have ideas for optimization, new features, or bug fixes:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-# 🎯 Concepts Demonstrated
+# 📄 License
 
-* Retrieval-Augmented Generation (RAG)
-* Large Language Model (LLM) Integration
-* OpenAI Whisper Integration
-* Semantic Search
-* Vector Databases (ChromaDB)
-* Text Embeddings
-* Prompt Engineering
-* Audio Preprocessing
-* Audio Processing
-* Modular Software Architecture
+Distributed under the MIT License. See `LICENSE` for more information.
