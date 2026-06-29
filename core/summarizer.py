@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langchain_mistralai import ChatMistralAI
+from core.llm_provider import get_llm
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -9,17 +9,13 @@ load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
 
-_llm = ChatMistralAI(
-    api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-small-latest",
-    temperature=0.2,
-)
+_llm = get_llm()
 
 # ── Text splitter ─────────────────────────────────────────────────────────────
 
 _splitter = RecursiveCharacterTextSplitter(
-    chunk_size=2000,
-    chunk_overlap=300,
+    chunk_size=15000,
+    chunk_overlap=1000,
     separators=["\n\n", "\n", ".", " "],
 )
 
@@ -81,7 +77,7 @@ _title_chain = _title_prompt | _llm | StrOutputParser()
 def summarize(transcript: str) -> str:
     """Chunk, summarize, and merge a transcript into a single summary."""
     chunks = _splitter.split_text(transcript)
-    chunk_summaries = [_chunk_chain.invoke({"chunk": chunk}) for chunk in chunks]
+    chunk_summaries = _chunk_chain.batch([{"chunk": chunk} for chunk in chunks], config={"max_concurrency": 1})
     combined = "\n\n".join(chunk_summaries)
     return _merge_chain.invoke({"summaries": combined})
 
