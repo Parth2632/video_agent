@@ -1,0 +1,49 @@
+
+"Alright, let's get started. Today is... let's say June 17th, and this is the Sprint 14 standup for the TechFlow AI team. I'll go through updates, blockers, and decisions real quick.
+
+So first — backend updates.
+Aryan finished the authentication refactor yesterday. The JWT token expiry bug that was causing random logouts on mobile is now fixed. That one's been open for like three weeks so good to finally close it.
+Priya completed the database migration scripts for moving from PostgreSQL 13 to 15. She ran it on staging last night, no data loss, performance looks about 20% better on read-heavy queries. We're planning to run the production migration this Friday at 2 AM to minimize user impact.
+Action item: Priya to send a maintenance notice email to all enterprise users by Wednesday.
+
+Moving to frontend.
+The new dashboard redesign is about 70% done. We've got the charts working, the filters are in, but the export to PDF button is still broken — it's generating blank pages on Chrome. Rahul's looking into it, thinks it's a rendering timing issue with the charting library.
+We also discovered that the onboarding flow breaks completely on Safari 16. That's a critical bug since about 30% of our users are on Mac.
+Action item: Rahul to fix the Safari onboarding bug before the end of this sprint. This is P0.
+Action item: Someone needs to own the PDF export fix — we'll assign that in Jira after this call.
+
+Now AI and ML updates — this is the fun part.
+So we've been running the new recommendation engine in shadow mode for the past two weeks alongside the old one. Results are looking really promising — the new model is showing 34% better click-through rates on product suggestions and 18% reduction in bounce rate on the recommendations page.
+We had a long discussion last week about whether to go full rollout or do a gradual A/B test. We've decided to go with a gradual rollout — 10% of users this week, 50% next week, full rollout the week after — so we can catch any edge cases without impacting everyone.
+Decision: Gradual rollout of recommendation engine v2 starting Monday. Karan owns the rollout monitoring dashboard.
+One blocker here — we're hitting rate limits on the third-party embeddings API during peak hours. We're evaluating switching to a self-hosted model to cut costs and remove the dependency. That decision is still open.
+Action item: Karan to prepare a cost comparison between the hosted API and self-hosting by Thursday's architecture review.
+
+Infrastructure and DevOps.
+Good news — the CI/CD pipeline refactor is done. Build times are down from 14 minutes to about 6 minutes. That's a huge quality of life improvement for the whole team.
+Bad news — we had a minor incident on Tuesday. The staging environment went down for about 40 minutes because of a misconfigured auto-scaling rule. No production impact, but it delayed QA for half a day.
+Action item: DevOps to document the auto-scaling configuration and add it to the runbook. We can't have this happen again on production.
+We're also evaluating moving our vector database from a managed cloud service to a self-hosted ChromaDB instance. Estimated monthly savings are around $400. Decision pending cost-benefit sign-off from the team lead.
+
+Upcoming deadlines.
+The client demo for Nexus Corp is on June 24th — that's one week from today. We need the dashboard redesign fully done, the PDF export fixed, and the recommendation engine rollout stable by then. That's non-negotiable.
+Sprint 14 ends June 21st. Sprint 15 planning is scheduled for June 22nd at 10 AM.
+Decision: We are freezing new feature development from June 20th to focus entirely on bug fixes and demo prep.
+
+Quick open questions before we wrap:
+One — do we need a staging environment refresh before the Nexus demo? Ananya to confirm.
+Two — should we invite the design team to the Sprint 15 planning session? We'll decide async on Slack.
+Three — the mobile app team asked if the new auth flow will affect their SDK integration. Aryan to follow up with them directly.
+
+Alright, that's everything. To recap the key decisions from today:
+One — gradual rollout of the recommendation engine starting Monday.
+Two — feature freeze from June 20th for demo prep.
+Three — production database migration this Friday at 2 AM.
+And the main action items:
+
+Priya sends the maintenance notice by Wednesday.
+Rahul fixes the Safari bug — P0, this sprint.
+Karan delivers the cost comparison by Thursday.
+DevOps updates the auto-scaling runbook.
+
+Okay, that's a wrap. Thanks everyone, see you tomorrow."

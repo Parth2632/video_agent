@@ -1,7 +1,6 @@
 from core.llm_provider import get_llm
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,6 +20,9 @@ def extract_insights(transcript: str) -> dict:
         "1. Action Items (Task, Owner, Deadline)\n"
         "2. Key Decisions\n"
         "3. Open Questions\n\n"
+        "CRITICAL: You MUST include the exact timestamp (e.g., [02:35]) from the transcript next to EVERY single action item, decision, or question you extract so the user can validate it.\n\n"
+        "IMPORTANT: Use the Video Title, Description, and User Provided Context (if any) provided at the start of the transcript "
+        "for context. This helps correctly identify names, acronyms, topics, and cultural greetings.\n\n"
         "Return the result strictly in this format, with headers exactly as shown:\n"
         "ACTIONS:\n[List action items here, or say 'No action items found']\n\n"
         "DECISIONS:\n[List key decisions here, or say 'No key decisions found']\n\n"

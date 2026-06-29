@@ -1,13 +1,8 @@
-import os
-from dotenv import load_dotenv
-from langchain_mistralai import ChatMistralAI
-
-load_dotenv()
+from langchain_ollama import ChatOllama
 
 def get_llm():
-    return ChatMistralAI(
-        model="mistral-large-latest",
+    # Using a local Ollama model. Make sure you have run `ollama run llama3` first!
+    return ChatOllama(
+        model="llama3",
         temperature=0.2,
-        max_retries=2,
-        api_key=os.environ.get("MISTRAL_API_KEY")
     )

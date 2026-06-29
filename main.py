@@ -1,5 +1,4 @@
 import os
-import argparse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,7 +8,6 @@ from core.transcriber import transcribe_audio
 from core.summarizer import summarize, create_title
 from core.extractor import extract_insights
 from core.rag_engine import build_rag_chain, ask_question
-from core.vector_store import clear_vector_store
 
 def main():
     print("========================================")
@@ -24,9 +22,11 @@ def main():
     lang_choice = input("Select language [1/2]: ").strip()
     language_choice = "hi" if lang_choice == "2" else None
 
+    print("\nOptional Context:")
+    user_context = input("Enter any helpful context about this meeting (or press Enter to skip): ").strip()
+
     print("\nCleaning up old session data...")
     clear_downloads()
-    clear_vector_store()
     
     if os.path.exists("sample.txt"): os.remove("sample.txt")
     if os.path.exists("sample_en.txt"): os.remove("sample_en.txt")
@@ -34,8 +34,24 @@ def main():
     is_youtube = source.startswith("http://") or source.startswith("https://")
     
     transcript = ""
+    metadata_str = ""
+
     if is_youtube:
-        print("\nFetching YouTube transcript directly if available...")
+        print("\nFetching YouTube metadata...")
+        try:
+            import yt_dlp
+            ydl_opts = {'quiet': True, 'skip_download': True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(source, download=False)
+                v_title = info.get('title', '')
+                channel = info.get('uploader', '')
+                description = info.get('description', '')
+                if v_title or channel or description:
+                    metadata_str = f"Video Title: {v_title}\nChannel: {channel}\nDescription: {description}\n\n---\n\nTranscript:\n"
+        except Exception:
+            pass
+
+        print("Fetching YouTube transcript directly if available...")
         from youtube_transcript_api import YouTubeTranscriptApi
         if "v=" in source:
             video_id = source.split("v=")[1].split("&")[0]
@@ -49,28 +65,18 @@ def main():
             try:
                 transcript_obj = transcript_list.find_transcript(['en'])
                 transcript_data = transcript_obj.fetch()
-                transcript = " ".join(chunk.text for chunk in transcript_data)
+                transcript = " ".join(f"[{int(chunk['start'])//60:02d}:{int(chunk['start'])%60:02d}] {chunk['text']}" for chunk in transcript_data)
                 print("Found native English transcript!")
             except Exception:
                 transcript_obj = transcript_list.find_transcript(['hi'])
                 try:
                     translated_obj = transcript_obj.translate('en')
                     transcript_data = translated_obj.fetch()
-                    transcript = " ".join(chunk.text for chunk in transcript_data)
+                    transcript = " ".join(f"[{int(chunk['start'])//60:02d}:{int(chunk['start'])%60:02d}] {chunk['text']}" for chunk in transcript_data)
                     print("Found Hindi transcript and translated via YouTube!")
                 except Exception:
-                    transcript_data = transcript_obj.fetch()
-                    raw_hindi = " ".join(chunk.text for chunk in transcript_data)
-                    with open("sample.txt", "w", encoding="utf-8") as f:
-                        f.write(raw_hindi)
-                    
-                    print("Found Hindi transcript, translating via deep-translator...")
-                    from deep_translator import GoogleTranslator
-                    translator = GoogleTranslator(source='hi', target='en')
-                    translated_chunks = []
-                    for i in range(0, len(raw_hindi), 1500):
-                        translated_chunks.append(translator.translate(raw_hindi[i:i+1500]))
-                    transcript = " ".join(translated_chunks)
+                    print("No translatable transcript found on YouTube. Falling back to Whisper...")
+                    pass
         except Exception as e:
             print(f"Could not fetch YouTube transcript API: {e}")
             print("Falling back to audio download + Whisper transcription...")
@@ -81,6 +87,12 @@ def main():
         media_path = process_input(source)
         print("Running Whisper transcription...")
         transcript = transcribe_audio(media_path, language_code=language_choice)
+        
+    if metadata_str and transcript:
+        transcript = metadata_str + transcript
+        
+    if user_context and transcript:
+        transcript = f"User Provided Context:\n{user_context}\n\n---\n\n" + transcript
         
     with open("sample_en.txt", "w", encoding="utf-8") as f:
         f.write(transcript)

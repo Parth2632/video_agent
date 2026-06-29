@@ -28,28 +28,25 @@ def download_youtube_audio(url: str) -> str:
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-
+        'extractor_args': {'youtube': ['player_client=android,ios,web']},
         'quiet': True,
     }
     
     if os.path.exists("cookies.txt"):
         ydl_opts['cookiefile'] = "cookies.txt"
-    else:
-        # Try to pull cookies from browser to avoid YouTube bot detection
-        ydl_opts['cookiesfrombrowser'] = ('chrome',)
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(url, download=True)
         except yt_dlp.utils.DownloadError as e:
             err_msg = str(e).lower()
-            if "cookie" in err_msg or "database" in err_msg or "permission" in err_msg or "dpapi" in err_msg:
-                # Fallback to edge
-                ydl_opts['cookiesfrombrowser'] = ('edge',)
+            if "cookie" in err_msg or "database" in err_msg or "permission" in err_msg or "dpapi" in err_msg or "forbidden" in err_msg or "403" in err_msg:
+                # Fallback to Chrome cookies if standard spoofing fails
+                ydl_opts['cookiesfrombrowser'] = ('chrome',)
                 try:
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl_edge:
                         info = ydl_edge.extract_info(url, download=True)
-                except yt_dlp.utils.DownloadError as e2:
+                except yt_dlp.utils.DownloadError:
                     # Last resort: try without cookies
                     del ydl_opts['cookiesfrombrowser']
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl_no_cookies:

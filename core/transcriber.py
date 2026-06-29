@@ -18,9 +18,9 @@ def transcribe_audio(audio_path: str, language_code: str = None) -> str:
     segments, info = model.transcribe(
         audio_path,
         language=language_code,
-        vad_filter=True,
-        vad_parameters=dict(min_silence_duration_ms=500)
+        task="translate",
+        condition_on_previous_text=False
     )
     
-    transcript = " ".join(segment.text for segment in segments)
+    transcript = " ".join(f"[{int(segment.start)//60:02d}:{int(segment.start)%60:02d}] {segment.text.strip()}" for segment in segments)
     return transcript.strip()

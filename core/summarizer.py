@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 from core.llm_provider import get_llm
 from langchain_core.prompts import ChatPromptTemplate
@@ -25,13 +24,16 @@ _chunk_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         "You are an expert at summarizing transcripts. "
-        "Write a concise summary while preserving the important information.",
+        "Write a concise summary while preserving the important information. "
+        "IMPORTANT: Use the Video Title, Description, and User Provided Context (if any) provided at the start of the transcript "
+        "for context. This helps correctly identify names, acronyms, topics, and cultural greetings.",
     ),
     (
         "human",
         "Summarize the following transcript chunk.\n\n"
         "Transcript:\n{chunk}\n\n"
-        "Provide:\n- A concise summary\n- Important points",
+        "Provide:\n- A concise summary\n- Important points\n\n"
+        "CRITICAL INSTRUCTION: You MUST format your important points like this: '[MM:SS] - Point description'. Use the exact timestamps from the transcript to allow the user to validate your claims.",
     ),
 ])
 
@@ -48,7 +50,8 @@ _merge_prompt = ChatPromptTemplate.from_messages([
     (
         "human",
         "Below are summaries of different parts of a transcript. "
-        "Combine them into one clean, concise final summary.\n\n"
+        "Combine them into one clean, concise final summary. Ensure that you preserve the timestamps for all important points so the user can cross-reference the original media.\n\n"
+        "CRITICAL INSTRUCTION: Keep the exact timestamp (e.g., [12:34]) next to every important point, action item, or decision in your final output!\n\n"
         "Summaries:\n{summaries}",
     ),
 ])
@@ -79,20 +82,11 @@ def summarize(transcript: str) -> str:
     chunks = _splitter.split_text(transcript)
     chunk_summaries = _chunk_chain.batch([{"chunk": chunk} for chunk in chunks], config={"max_concurrency": 1})
     combined = "\n\n".join(chunk_summaries)
+    if len(chunks) == 1:
+        return combined
     return _merge_chain.invoke({"summaries": combined})
 
 
 def create_title(summary: str) -> str:
     """Generate a video title from an existing summary."""
-    return _title_chain.invoke({"summary": summary}).strip()
-
-
-def summarize_and_title(transcript: str) -> tuple[str, str]:
-    """
-    Summarize a transcript and generate a title in one call.
-    Returns (summary, title) — summary is computed once and reused for the title.
-    """
-    summary = summarize(transcript)
-    title = create_title(summary)
-    return summary, title
-    
+    return _title_chain.invoke({"summary": summary}).strip()
