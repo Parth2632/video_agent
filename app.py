@@ -735,15 +735,7 @@ def process_and_transcribe(source, is_file=False, file_bytes=None, language_choi
                 tmp_file.write(file_bytes)
                 media_path = tmp_file.name
                 
-            if file_suffix.lower() != ".wav":
-                import subprocess
-                wav_path = media_path + ".wav"
-                try:
-                    subprocess.run(["ffmpeg", "-y", "-i", media_path, "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le", wav_path], check=True, capture_output=True)
-                    os.remove(media_path)
-                    media_path = wav_path
-                except Exception as e:
-                    print(f"FFmpeg conversion failed: {e}")
+            media_path = process_input(media_path)
         else:
             media_path = process_input(source)
 

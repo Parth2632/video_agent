@@ -21,13 +21,18 @@ def download_youtube_audio(url: str) -> str:
     Returns the local path to the downloaded audio file.
     """
     ydl_opts = {
-        'format': 'm4a/bestaudio/best',
+        'format': 'bestaudio/best',
         'outtmpl': os.path.join(DOWNLOAD_DIR, '%(id)s.%(ext)s'),
         'ffmpeg_location': os.path.join(sys.prefix, 'Scripts'),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'm4a',
+            'preferredcodec': 'wav',
         }],
+        'postprocessor_args': [
+            '-ar', '16000',
+            '-ac', '1',
+            '-c:a', 'pcm_s16le'
+        ],
         'extractor_args': {'youtube': ['player_client=android,ios,web']},
         'quiet': True,
     }
@@ -56,13 +61,32 @@ def download_youtube_audio(url: str) -> str:
                 
         filename = ydl.prepare_filename(info)
         base, _ = os.path.splitext(filename)
-        expected_file = base + '.m4a'
+        expected_file = base + '.wav'
         if os.path.exists(expected_file):
             return expected_file
         elif os.path.exists(filename):
             return filename
             
     raise ValueError(f"Failed to download audio from {url}.")
+
+
+def ensure_wav(media_path: str) -> str:
+    if media_path.lower().endswith(".wav"):
+        return media_path
+        
+    import subprocess
+    import time
+    
+    filename = os.path.basename(media_path)
+    base, _ = os.path.splitext(filename)
+    wav_path = os.path.join(DOWNLOAD_DIR, f"{base}_{int(time.time())}.wav")
+    
+    try:
+        subprocess.run(["ffmpeg", "-y", "-i", media_path, "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le", wav_path], check=True, capture_output=True)
+        return wav_path
+    except Exception as e:
+        print(f"FFmpeg conversion failed: {e}")
+        return media_path
 
 
 def process_input(source: str) -> str:
@@ -73,4 +97,4 @@ def process_input(source: str) -> str:
         print("Using local file...")
         raw_path = source
         
-    return raw_path
+    return ensure_wav(raw_path)
