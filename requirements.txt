@@ -3,70 +3,31 @@ langchain
 langchain-core
 langchain-community
 langchain-mistralai
+langchain-ollama
 
 # RAG
 chromadb
 sentence-transformers
 huggingface-hub
+langchain-chroma
 
 # Embeddings
 langchain-huggingface
 
 # Whisper (local transcription)
-openai-whisper
+faster-whisper>=1.0.0
 
 # Audio & Video
 yt-dlp
 ffmpeg-python
 pydub
+imageio-ffmpeg
 
 # Translation
 deep-translator
 
 # PDF/Text Export
 fpdf2
-
-# UI
-streamlit
-
-# Environment Variables
-python-dotenv
-
-# Token Counting
-tiktoken
-
-# Document Loaders
-pypdf
-# LLM
-langchain
-langchain-core
-langchain-community
-langchain-mistralai
-
-# RAG
-chromadb
-sentence-transformers
-huggingface-hub
-
-# Embeddings
-langchain-huggingface
-
-# Whisper (local transcription)
-openai-whisper
-
-# Audio & Video
-yt-dlp
-ffmpeg-python
-pydub
-
-# Translation
-deep-translator
-
-# PDF/Text Export
-fpdf2
-
-# UI
-streamlit
 
 # Environment Variables
 python-dotenv
@@ -84,8 +45,6 @@ pandas
 
 # Optional (recommended)
 torch
-langchain-chroma
-imageio-ffmpeg
 
 # YouTube Transcript
 youtube-transcript-api
