@@ -60,9 +60,9 @@ Features a stunning **glassmorphism** design with custom CSS, providing a premiu
 7. **Solving the "Chronological RAG" Problem:** Semantic search (dense vector retrieval) is notoriously bad at temporal queries (e.g., "what happened at 2 minutes?") because numbers lack strict semantic correlation. We implemented a dynamic regex-based "time-slicer" that intercepts chronological queries, bypasses the RAG database entirely, and extracts a dynamic reading window (±30s to ±120s based on total video length) directly from the raw transcript. To aggressively test this, we performed a blind evaluation:
    
    **Evaluation Set:**
-   - 40 manually verified QA pairs
-   - 10 timestamp-based retrieval queries
-   - 30 semantic understanding queries
+   - 8 manually verified QA pairs
+   - 1 timestamp-based retrieval query
+   - 7 semantic understanding queries
 
    This rigorous evaluation verified our custom time-slicer boosted chronological extraction to a perfect 10/10 while the overall system maintained an 87.5% semantic accuracy score (graded via manual scoring against the ground-truth hidden script).
 
