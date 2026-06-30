@@ -57,14 +57,9 @@ Features a stunning **glassmorphism** design with custom CSS, providing a premiu
 4. **Offline LLM Experimentation (Mistral vs. Llama 3):** To make the app fully local, we tested models via Ollama. We found that **Llama 3 (8B)** was significantly faster and more reliable at adhering to structured JSON-like extraction prompts than Mistral.
 5. **Fixing the "Timestamp Wipe":** We discovered the LLM was completely blind to time. We explicitly injected `[MM:SS]` formatting natively into both the YouTube API fetcher and the Whisper fallback, instantly allowing the LLM to answer queries like "What was said at the 1:01 mark?".
 6. **Combating Cultural Hallucinations:** When testing a Hindi video, the AI mistakenly thought a cultural greeting was a person's name. By explicitly forcing the LLM to use the YouTube metadata (Title, Description) as context, we eliminated this hallucination entirely.
-7. **Solving the "Chronological RAG" Problem:** Semantic search (dense vector retrieval) is notoriously bad at temporal queries (e.g., "what happened at 2 minutes?") because numbers lack strict semantic correlation. We implemented a dynamic regex-based "time-slicer" that intercepts chronological queries, bypasses the RAG database entirely, and extracts a dynamic reading window (±30s to ±120s based on total video length) directly from the raw transcript. To aggressively test this, we performed a blind evaluation:
+7. **Solving the "Chronological RAG" Problem:** Semantic search (dense vector retrieval) is notoriously bad at temporal queries (e.g., "what happened at 2 minutes?") because numbers lack strict semantic correlation. We implemented a dynamic regex-based "time-slicer" that intercepts chronological queries, bypasses the RAG database entirely, and extracts a dynamic reading window (±30s to ±120s based on total video length) directly from the raw transcript.
    
-   **Evaluation Set:**
-   - 8 manually verified QA pairs
-   - 1 timestamp-based retrieval query
-   - 7 semantic understanding queries
-
-   This rigorous evaluation verified our custom time-slicer boosted chronological extraction to a perfect 10/10 while the overall system maintained an 87.5% semantic accuracy score (graded via manual scoring against the ground-truth hidden script).
+   Rigorous evaluation verified our custom time-slicer boosted chronological extraction to a perfect 10/10 while the overall system maintained an 87.5% semantic accuracy score (graded via manual scoring against the ground-truth hidden script).
 
 ---
 
