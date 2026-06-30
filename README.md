@@ -24,9 +24,9 @@ The system is optimized for speed while preserving high-quality transcript under
 Features a stunning **glassmorphism** design with custom CSS, providing a premium SaaS feel. 
 
 <div align="center">
-  <img src="screenshots/Screenshot 2026-06-30 052537.png" width="95%" alt="UI Screenshot 1"/>
+  <img src="screenshots/landing.png" width="95%" alt="UI Screenshot 1"/>
   <img src="screenshots/summary_screenshot.png" width="95%" alt="UI Screenshot 2"/>
-  <img src="screenshots/Screenshot 2026-06-30 053328.png" width="95%" alt="UI Screenshot 3"/>
+  <img src="screenshots/chatbot.png" width="95%" alt="UI Screenshot 3"/>
 </div>
 
 ---
