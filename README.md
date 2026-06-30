@@ -23,9 +23,15 @@ The system is optimized for speed while preserving high-quality transcript under
 
 Features a stunning **glassmorphism** design with custom CSS, providing a premium SaaS feel. 
 
-*(Note to maintainer: Insert a 15–20 second Demo GIF here showing upload, transcript generation, insights, and semantic Q&A. This dramatically increases engagement.)*
-- `[Placeholder: 15-20 second Demo GIF]`
-- `[Placeholder: Dashboard Screenshot]`
+<div align="center">
+  <img src="screenshots/Screenshot 2026-06-30 052537.png" width="45%" alt="UI Screenshot 1"/>
+  <img src="screenshots/Screenshot 2026-06-30 052611.png" width="45%" alt="UI Screenshot 2"/>
+  <img src="screenshots/Screenshot 2026-06-30 052624.png" width="45%" alt="UI Screenshot 3"/>
+  <img src="screenshots/Screenshot 2026-06-30 052836.png" width="45%" alt="UI Screenshot 4"/>
+  <img src="screenshots/Screenshot 2026-06-30 052854.png" width="45%" alt="UI Screenshot 5"/>
+  <img src="screenshots/Screenshot 2026-06-30 052913.png" width="45%" alt="UI Screenshot 6"/>
+  <img src="screenshots/Screenshot 2026-06-30 053328.png" width="45%" alt="UI Screenshot 7"/>
+</div>
 
 ---
 
@@ -75,7 +81,7 @@ Features a stunning **glassmorphism** design with custom CSS, providing a premiu
 *(Note: Of the final 2 minutes, the actual GPU transcription takes barely 60 seconds; the remainder is generation time for the Llama 3 summaries and insights.)*
 
 Benchmarks recorded on:
-- **RTX 4050 Laptop GPU**
+- **Nvidia A2000 GPU**
 - **CUDA 12**
 - **Whisper tiny INT8**
 
